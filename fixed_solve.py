@@ -128,11 +128,11 @@ def fixed_run(task_file='tasksets/task_1.json', task_name='test_task', output_fi
 
 if __name__ == '__main__':
     #unittest.main(argv=[''], exit=False)
-    #fixed_run(fixed_indices=[0,1,2,3], fixed_values=[35,95,6,15])
+    fixed_run(fixed_indices=[0,1,2,3], fixed_values=[35,95,6,15])
 
     # To run on command line
-    import fire # pip install fire
-    fire.Fire(fixed_run)
+    #import fire # pip install fire
+    #fire.Fire(fixed_run)
     # example command:
     # python fixed_run.py --task_file='tasksets/task_1.json' --task_name='test_task' --output_file='results.json' --max_fevals=500 --fixed_indices=[0,1,2,3] --fixed_values=[35,95,6,15]
 

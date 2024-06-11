@@ -58,24 +58,9 @@ class FacilityPlacementTask():
 		for constraint, args in self.Constraints:
 			values.append(constraint.sat_eval(args, self.Facillities, self.Terrain_cache))
 			#print(constraint.generate_utterance(args)[0], args, constraint.sat_eval(args, self.Facillities, self.Terrain_cache))
+
 		return TRUTH_VALUE_AGGREGATION(values)
 	
-	def evaluate_fitness(self, x, y):
-		"""
-		A fitness function to evaluate (x, y) coordinates.
-		Each x, y pair corresponds to a facility.
-		"""
-		if len(x) != len(self.Facillities) or len(y) != len(self.Facillities):
-			raise ValueError("Size of x and y must match number of facilities.")
-
-		for idx, f in enumerate(self.Facillities):
-			f.Polygon = [[x[idx], y[idx]]]
-
-		values = [constraint.sat_eval(args, self.Facillities, self.Terrain_cache) for constraint, args in self.Constraints]
-		
-		return TRUTH_VALUE_AGGREGATION(values)
-	
-
 	def solve_with_z3(self):
 		s = Solver()
 		
@@ -109,6 +94,7 @@ class FacilityPlacementTask():
 			
 		return s.model()
 		
+
 	def compute_sat_percentage(self):
 		values = []
 		for constraint, args in self.Constraints:
@@ -204,7 +190,6 @@ class FacilityPlacementTask():
 		return newTask
 
 if __name__ == '__main__':
-	from FacilityPlacementTaskRenderer import FacilityPlacementTaskRenderer
 	task = FacilityPlacementTask.load_from_json(json.load(open('tasksets/generated_tasks_10_terrain_10_constraints/task_1.json', 'r')), "task_1")
 	print('sat value: ', task.evaluate())
 
