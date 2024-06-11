@@ -1,0 +1,48 @@
+pbt-test-2:    
+    env: FACILITY_PlACEMENT
+    run: PPO    
+    checkpoint_at_end: True  
+    
+    local_dir: "./checkpoints/tests"
+    # restore: "/Users/wangyi/Workspace/ray_results/facility_placement/vision_embedding_debug/random_terrain_insideLake_one_agent_big_full_sat_wrd/facility-placement-ppo-train/PPO_FACILITY_PlACEMENT_98fe4_00003_3_2022-12-17_21-24-03/checkpoint_000125"
+    checkpoint_freq: 2
+
+    stop:
+        # timesteps_total: 10000000
+        # episode_reward_mean: 40
+        # episodes_total: 3 
+        training_iteration: 2
+    
+    # num of trails to run during PBT
+    num_samples: 4
+
+    config:
+        framework: "torch"
+
+        gamma: 0.99
+        num_workers: 7
+        num_gpus: 1
+        batch_mode: complete_episodes
+
+        # lr: 0.0001
+        # kl_coeff: 0.5
+        # num_gpus_per_worker: 1
+        # num_envs_per_worker: 1
+        # rollout_fragment_length: 200
+        # train_batch_size: 4000
+        # observation_filter: NoFilter
+
+        env_config:
+            tasks_folder: "tasks/one_task_9_constraints"
+
+        model:
+            #dim: 42
+            #vf_share_layers: true
+            fcnet_hiddens: [1024, 512]
+            #post_fcnet_hiddens: [128]
+
+        #multiagent:
+        #    policies: ["main"]
+        #    # YAML-capable policy_mapping_fn definition via providing a callable class here.
+        #    policy_mapping_fn:
+        #        type: train.PolicyMappingFn

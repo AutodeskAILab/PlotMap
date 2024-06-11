@@ -1,0 +1,5 @@
+Archives/*
+models/*
+tasksets/*
+*.pyc
+results
