@@ -9,6 +9,9 @@ Dependent on the following libraries:
 - Gym 0.23.1
 - If there are other missing libraries, they can be simply installed with `pip install`
 
+## Data
+Task sets can be downloaded from https://github.com/AutodeskAILab/PlotMap-Dataset
+
 ## RL Single Rollout
 
 Use the following command to execute a single rollout
@@ -19,8 +22,6 @@ run_agent.py path_to_checkpont path_to_task
 If successful, a json file namned `acility_positions.json` will be created in the current work directory with rollout information.
 
 ## RL Model Train
-Task sets can be downloaded from https://github.com/AutodeskAILab/PlotMap-Dataset
-
 Modify `facility_placement_ppo.yaml` as needed, then execute
 ```
 python train.py -f facility_placement_ppo.yaml
