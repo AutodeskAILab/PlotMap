@@ -21,7 +21,7 @@ run_agent.py path_to_checkpont path_to_task
 ```
 If successful, a json file namned `acility_positions.json` will be created in the current work directory with rollout information.
 
-## RL Model Train
+## RL Model Training
 Modify `facility_placement_ppo.yaml` as needed, then execute
 ```
 python train.py -f facility_placement_ppo.yaml
