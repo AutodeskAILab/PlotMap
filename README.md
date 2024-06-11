@@ -35,5 +35,5 @@ python run_gym.py
 ## CMA-ES solving/inference
 Commands for running CMA-ES solving on example task
 ```
-python fixed_run.py --task_file='tasksets/task_1.json' --task_name='test_task' --output_file='results.json' --max_fevals=500 --fixed_indices=[0,1,2,3] --fixed_values=[35,95,6,15]
+python fixed_solve.py --task_file='tasksets/task_1.json' --task_name='test_task' --output_file='results.json' --max_fevals=500 --fixed_indices=[0,1,2,3] --fixed_values=[35,95,6,15]
 ```
