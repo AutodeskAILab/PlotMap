@@ -60,9 +60,9 @@ def GetSATConstraintsForVisibleFromSomeFacility(args, var_map):
 				# No intersection either because the two lines are parallel, or the intersection between two lines are not on either lines
 				no_intersect = Or(
 					slope_f == slope_tr, 
-					Or(And(inter_x >= var_map[f2][0], inter_x >= var_map[f1][0]),
-					And(inter_x <= var_map[f1][0], inter_x <= var_map[f2][0])),
-					And(var_map[f2][0] == var_map[f1][0], Or(And(var_map[f2][0] >= line[0][0], var_map[f2][0] >= line[1][0]), And(var_map[f2][0] <= line[1][0], var_map[f2][0] <= line[0][0])))
+					Or(And(inter_x > var_map[f2][0], inter_x > var_map[f1][0]),
+					And(inter_x < var_map[f1][0], inter_x < var_map[f2][0])),
+					And(var_map[f2][0] == var_map[f1][0], Or(And(var_map[f2][0] > line[0][0], var_map[f2][0] > line[1][0]), And(var_map[f2][0] < line[1][0], var_map[f2][0] < line[0][0])))
 					)
 				sub_cst = And(sub_cst, no_intersect)
 			cst = Or(cst, sub_cst)
@@ -377,8 +377,11 @@ def GetSATConstraintsForInBetweenTwoFacilities(args, var_map):
 				slope = (var_map[f2][1] - var_map[f1][1]) / (var_map[f2][0] - var_map[f1][0])
 				intercept = var_map[f1][1] - slope * var_map[f1][0]
 				cst = Or(cst, 
+			 			# f is on the line segment formed by f1 and f2
 	     				And(
+							# f is on the line
 							var_map[f][1] == var_map[f][0] * slope + intercept,
+							# f is within the segment
 							And(
 								Or(And(var_map[f][0] <= var_map[f1][0], var_map[f][0] >= var_map[f2][0]),
 	   							   And(var_map[f][0] <= var_map[f2][0], var_map[f][0] >= var_map[f1][0])),
@@ -390,7 +393,7 @@ def GetSATConstraintsForInBetweenTwoFacilities(args, var_map):
 	return cst		
 
 def EvaluateInBetweenTwoFacilities(args):
-
+	# Has flaw: doesn't work when the distance between f and f1/f2 is smaller than buffer_size
 	assert len(args) == 3
 
 	results = []
@@ -995,7 +998,7 @@ def GetSATConstraintsForAcrossTerrainTypeFrom(args, var_map):
 	for f1 in args[1]:
 		for f2 in args[2]:
 			# See if the line segment formed by f1 and f2 has any intersection with any line segment on the polygon
-			sub_cst = True
+			sub_cst = False
 			for line in lines:
 				slope_f = (var_map[f2][1] - var_map[f1][1]) / (var_map[f2][0] - var_map[f1][0])
 				if (line[1][0] - line[0][0]) == 0:
@@ -1004,14 +1007,14 @@ def GetSATConstraintsForAcrossTerrainTypeFrom(args, var_map):
 					slope_tr = (line[1][1] - line[0][1]) / (line[1][0] - line[0][0])
 
 				inter_x = (line[0][1] - var_map[f1][1] + slope_f * var_map[f1][0]- slope_tr * line[0][0]) / (slope_f - slope_tr)
-				inter_y = var_map[f1][1] + slope_f * (inter_x - var_map[f1][0])
+				#inter_y = var_map[f1][1] + slope_f * (inter_x - var_map[f1][0])
 				
 				# The two lines have intersection when their slopes are different and the intersection point is in between the two points of the line segment
 				has_intersect = And(
 					slope_f != slope_tr, 
-					Or(And(inter_x <= var_map[f2][0], inter_x >= var_map[f1][0]),
-					And(inter_x <= var_map[f1][0], inter_x >= var_map[f2][0])),
-					And(var_map[f2][0] == var_map[f1][0], Or(And(var_map[f2][0] <= line[0][0], var_map[f2][0] >= line[1][0]), And(var_map[f2][0] <= line[1][0], var_map[f2][0] >= line[0][0])))
+					Or(And(inter_x < var_map[f2][0], inter_x > var_map[f1][0]),
+					And(inter_x < var_map[f1][0], inter_x > var_map[f2][0])),
+					And(var_map[f2][0] == var_map[f1][0], Or(And(var_map[f2][0] < line[0][0], var_map[f2][0] > line[1][0]), And(var_map[f2][0] < line[1][0], var_map[f2][0] > line[0][0])))
 					)
 				sub_cst = Or(sub_cst, has_intersect)
 			cst = And(cst, sub_cst)

@@ -29,8 +29,8 @@ CONSTRAINTS = PopulateAllInstantiations(
 	ConstraintType.constraint_library.keys(),
 	TERRAIN_TYPES, ['obj_'+ str(i) for i in range(10)])
 
-#print('constraint instantiations:', constraints)
-#print('number of constraint instantiations:', len(constraints))
+#print('constraint instantiations:', CONSTRAINTS)
+#print('number of constraint instantiations:', len(CONSTRAINTS))
 
 class TurnBasedFacilityPlacementEnv(gym.Env):
 
@@ -67,22 +67,27 @@ class TurnBasedFacilityPlacementEnv(gym.Env):
 
 		# Observation space
 		# Currently only supports single tag for facilities
-		self.obs_facility_shape = (self.num_facilities, self.dimension + 2)
-		self.obs_facility_flattened_shape = self.num_facilities * (self.dimension + 2)
+		self.obs_facility_shape = (self.num_facilities, self.dimension + self.num_facility_tags + 1)
+		self.obs_facility_flattened_shape = self.num_facilities * (self.dimension + self.num_facility_tags + 1)
 		#self.obs_constraint_shape = (len(ConstraintType.constraint_list) + MAX_NUM_ARGS * self.num_facilities, self.max_num_constraints)
 		self.obs_constraint_flattend_shape = len(CONSTRAINTS)
 		if self.vision_only:
-			self.obs_vision_shape = tuple(list(self.obs_map_shape) + [self.num_terrain_tags + self.num_facility_tags ])
-			self.obs_vision_shape_self = tuple(list(self.obs_map_shape) + [self.num_terrain_tags + self.num_facility_tags + 1])
-			#self.observation_space = spaces.Box(low = -1, high = 1, shape = self.obs_vision_shape_self, dtype=int)
-			self.obs_vision_shape = (512, )
-			self.observation_space = spaces.Tuple((spaces.Box(low = 0.0, high = 10.0, shape = self.obs_vision_shape, dtype=np.float64),
-										spaces.Box(low = -1, high = 100, shape = self.obs_constraint_shape, dtype=np.int32)))
+			#self.obs_vision_shape = tuple(list(self.obs_map_shape) + [self.num_terrain_tags + self.num_facility_tags + 1])
+			self.obs_vision_shape = tuple(list(self.obs_map_shape) + [3])
+			#self.obs_vision_shape_self = tuple(list(self.obs_map_shape) + [self.num_terrain_tags + self.num_facility_tags + 1])
+			#self.observation_space = spaces.Box(low = -1, high = 1, shape = self.obs_vision_shape, dtype=int)
+			#self.obs_vision_shape = (512, )
+			self.observation_space = spaces.Tuple((spaces.Box(low = 0.0, high = 1.0, shape = self.obs_vision_shape, dtype=np.float64),
+										spaces.Box(low = 0, high = 1, shape = (self.obs_constraint_flattend_shape, ), dtype=np.int32)))
 		else:
 			self.obs_vision_shape = (512, )
+			#self.obs_vision_shape = tuple(list(self.obs_map_shape) + [3])
 			self.observation_space = spaces.Tuple((spaces.Box(low = 0.0, high = 10.0, shape = self.obs_vision_shape, dtype=np.float64),
-						     spaces.Box(low = -1.0, high = float(self.num_facility_tags), shape = (self.obs_facility_flattened_shape, ), dtype=np.float64),
+						     spaces.Box(low = 0.0, high = 1.0, shape = (self.obs_facility_flattened_shape, ), dtype=np.float64),
 								 spaces.Box(low = 0, high = 1, shape = (self.obs_constraint_flattend_shape, ), dtype=np.int32)))
+			#self.observation_space = spaces.Tuple(spaces.Box(low = -1.0, high = float(self.num_facility_tags), shape = (self.obs_facility_flattened_shape, ), dtype=np.float64),
+			#					 spaces.Box(low = 0, high = 1, shape = (self.obs_constraint_flattend_shape, ), dtype=np.int32))
+
 		self.reset()
 
 	def step(self, action):
@@ -244,8 +249,24 @@ class TurnBasedFacilityPlacementEnv(gym.Env):
 		img = cv2.circle(img, position, radius=radius, color=SelfIndicatorColor, thickness=-1)
 
 	def create_facility_matrix(self, subject_facility):
-		obs_facility = np.full(self.obs_facility_shape, -1.0)
-		# Information about self
+		obs_facility = np.full(self.obs_facility_shape, 0.0)
+
+		facility_cnt = 0
+		for f in self.fpTask.Facillities:
+			for i in range(self.dimension):
+				obs_facility[facility_cnt][i] = float(f.Polygon[0][i]) / float(self.fpTask.Map_scale[i])
+			# currently only care about the first facility tag
+			assert(f.Tags[0] in self.fpTask.Facility_tags) 
+			obs_facility[facility_cnt][self.dimension + 1 + self.fpTask.Facility_tags.index(f.Tags[0])] = 1.0
+			# self indicator
+			if f == subject_facility:
+				obs_facility[facility_cnt][self.dimension] = 1.0
+			else:
+				obs_facility[facility_cnt][self.dimension] = 0.0
+			facility_cnt += 1
+
+	    # Legacy code ----
+		""" # Information about self
 		for i in range(self.dimension):
 			obs_facility[0][i] = float(subject_facility.Polygon[0][i]) / float(self.fpTask.Map_scale[i])
 		# Self indicator
@@ -263,7 +284,8 @@ class TurnBasedFacilityPlacementEnv(gym.Env):
 			# currently only care about the first facility tag
 			assert(f.Tags[0] in self.fpTask.Facility_tags) 
 			obs_facility[facility_cnt][self.dimension + 1] = float(self.fpTask.Facility_tags.index(f.Tags[0]))
-			facility_cnt += 1
+			facility_cnt += 1 """
+		# ---- Legacy code 
 
 		return obs_facility
 
@@ -280,40 +302,19 @@ class TurnBasedFacilityPlacementEnv(gym.Env):
 			self.obs_cache = np.array(self.obs_terrain_cache, copy=True)
 			self.create_facility_vision(self.obs_cache)
 			self.create_vision_self_indicator(self.obs_cache, subject_facility)
-			obs_img = Image.fromarray(self.obs_cache.astype('uint8'), 'RGB')
-			obs_vec = img2vec.get_vec(obs_img)
-			return (obs_vec, self.obs_constraint_cache)
+			self.obs_cache = np.divide(self.obs_cache, 255)
+			#obs_img = Image.fromarray(self.obs_cache.astype('uint8'), 'RGB')
+			#obs_vec = img2vec.get_vec(obs_img)
+			return (self.obs_cache, self.obs_constraint_cache)
 		else:
 			facility_matrix = self.create_facility_matrix(subject_facility)
 			self.obs_cache = self.obs_terrain_cache
+			#self.obs_cache = np.divide(self.obs_cache, 255)
 			terrain_img = Image.fromarray(self.obs_cache.astype('uint8'), 'RGB')
 			terrain_vec = img2vec.get_vec(terrain_img)
 			return (terrain_vec, facility_matrix.flatten(), self.obs_constraint_cache)
+			#return (self.obs_cache, facility_matrix.flatten(), self.obs_constraint_cache)
 			#return (terrain_vec, facility_matrix.flatten())
-'''
-legacy code, to be removed 
-'''
-# def createTaskLibrary(task_folder):
-# 	print('creating task library....')
-# 	task_cache = []
-# 	for filename in os.listdir(task_folder):
-# 		f = os.path.join(task_folder, filename)
-# 		if filename.endswith('.json') and os.path.isfile(f):
-# 			print('adding task ' + f)
-# 			task_cache.append(
-# 				FacilityPlacementTask.load_from_json(
-# 					json.load(open(f, 'r'))))
-# 	print('finished creating task library.')
-
-# 	return task_cache
-
-# def env_creator(env_config):
-	
-# 	tasks = createTaskLibrary(env_config['tasks_folder'])
-	
-# 	env = TurnBasedFacilityPlacementEnv({'tasks': tasks})
-
-#     return env
 
 def env_creator(env_config):
 	
@@ -369,16 +370,13 @@ if __name__ == '__main__':
 	locking_state = [0, 1, 0, 1, 0, 0, 0, 0, 0, 0]
 	tasks_folder = 'tasksets/generated_tasks_10_terrain_15_constraints/'
 	env = TurnBasedFacilityPlacementEnv({'tasks_folder': tasks_folder,
-									     'fixed_task': 'task_5.json',
-										 'init_locs': init_locs,
-										 })
+										 'facility_locking_states': locking_state})
 
 	sample = env.observation_space.sample()
-	#print('observation shape:', sample[0].shape, sample[1].shape)
+	print('observation shape:', sample[0].shape, sample[1].shape)
 
 	#print('Sample observation:', sample)
 	#terrain_obs, facility_obs = sample
-	print('Observation shape:', sample[0].shape, sample[1].shape, sample[2].shape)
 	init_obs = env.reset()
 
 	print('initial observation:', init_obs)
