@@ -10,7 +10,7 @@ Dependent on the following libraries:
 - If there are other missing libraries, they can be simply installed with `pip install`
 
 ## Data
-Task sets can be downloaded from https://github.com/AutodeskAILab/PlotMap-Dataset
+Task sets can be downloaded from https://huggingface.co/datasets/ywang485/plotmap-taskset
 
 ## RL Single Rollout
 
