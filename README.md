@@ -8,7 +8,10 @@ Dependent on the following libraries:
 - Ray(RLLib) 2.0.1
 - Shapely 1.8.4
 - Gym 0.23.1
-- cma
+- cma 3.4.0
+- numpy 1.23.1
+- opencv-python 4.10.0.84
+- img2vec_pytorch 1.0.1
 - If there are other missing libraries, they can be simply installed with `pip install`
 
 ## Data
