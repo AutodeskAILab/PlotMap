@@ -1,4 +1,4 @@
-# PlotMap: Automated Layout Design for Building Game Worlds
+# PlotMap: Automated Layout Design for Building Game Worlds [[paper](https://arxiv.org/abs/2309.15242)]
 ![teaser](https://github.com/AutodeskAILab/PlotMap/assets/11589314/d12fe0ed-8414-47df-936a-58c8c12ba01a)
 
 ## Environment Setup
