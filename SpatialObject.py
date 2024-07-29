@@ -7,13 +7,16 @@ SCALE = 100.0
 #inf = 10e15
 
 def constructShapelyPolygon(vertices):
-	array = np.array(vertices)
-	if len(array.shape) == 2:
-		if len(vertices) < 3:
-			return None
-		else:
-			return Polygon(vertices)
-	else:
+	try:
+		# Single polygon
+		array = np.array(vertices)
+		if len(array.shape) == 2:
+			if len(vertices) < 3:
+				return None
+			else:
+				return Polygon(vertices)
+	except Exception:
+		# Multiple polygons
 		list_of_polygons = [Polygon(vs) for vs in vertices]
 		combined_polygon = MultiPolygon([])
 		for poly in list_of_polygons:
