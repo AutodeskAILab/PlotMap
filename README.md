@@ -2,11 +2,13 @@
 ![teaser](https://github.com/AutodeskAILab/PlotMap/assets/11589314/d12fe0ed-8414-47df-936a-58c8c12ba01a)
 
 ## Environment Setup
+Tested under Python 3.9.
 Dependent on the following libraries:
 - Pytorch 2.0.x
 - Ray(RLLib) 2.0.1
 - Shapely 1.8.4
 - Gym 0.23.1
+- cma
 - If there are other missing libraries, they can be simply installed with `pip install`
 
 ## Data
