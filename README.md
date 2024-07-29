@@ -12,6 +12,7 @@ Dependent on the following libraries:
 - numpy 1.23.1
 - opencv-python 4.10.0.84
 - img2vec_pytorch 1.0.1
+- sentence_transformer 3.0.1
 - If there are other missing libraries, they can be simply installed with `pip install`
 
 ## Data
