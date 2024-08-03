@@ -18,6 +18,12 @@ Dependent on the following libraries:
 ## Data
 Task sets can be downloaded from https://huggingface.co/datasets/ywang485/plotmap-taskset
 
+## CMA-ES solving/inference
+Commands for running CMA-ES solving on example task
+```
+python fixed_solve.py --task_file='tasksets/task_1.json' --task_name='test_task' --output_file='results.json' --max_fevals=500 --fixed_indices=[0,1,2,3] --fixed_values=[35,95,6,15]
+```
+
 ## RL Single Rollout
 
 Use the following command to execute a single rollout
@@ -40,8 +46,3 @@ python run_gym.py
 ```
 1000 rollouts will be performed and success rate will be reported after loading the task set (which may take some time). 
 
-## CMA-ES solving/inference
-Commands for running CMA-ES solving on example task
-```
-python fixed_solve.py --task_file='tasksets/task_1.json' --task_name='test_task' --output_file='results.json' --max_fevals=500 --fixed_indices=[0,1,2,3] --fixed_values=[35,95,6,15]
-```
